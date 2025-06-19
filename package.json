@@ -1,13 +1,15 @@
 {
-  "name": "secroxy-node",
-  "version": "1.0.0",
-  "description": "A simple Node.js web proxy using Unblocker",
+  "name": "secroxy-2.0",
+  "version": "2.0.0",
+  "description": "Secroxy 2.0 - A stable Node.js web proxy using http-proxy-middleware and Express",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
+  "author": "Kelvin Elface Ngowo (Pcam Logic)",
+  "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
-    "unblocker": "^2.2.3"
+    "http-proxy-middleware": "^2.0.6"
   }
 }
