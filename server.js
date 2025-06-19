@@ -1,46 +1,40 @@
-const express = require("express");
-const unblocker = require("unblocker");
+const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 
-// Tumia unblocker bila defaults zilizofutwa kwenye version mpya
-app.use(unblocker({
-  prefix: '/proxy/'
-}));
-
-// Homepage ya Secroxy
-app.get("/", (req, res) => {
+// Homepage with form
+app.get('/', (req, res) => {
   res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Secroxy (Node Edition)</title>
-    </head>
-    <body style="font-family:sans-serif;text-align:center;margin-top:5rem;">
-      <h2>🌐 Karibu Secroxy (Node Edition)</h2>
-      <p>Ingiza URL unayotaka ku-browse kwa njia ya siri:</p>
-      <form method="GET" action="/proxy/">
-        <input 
-          type="text" 
-          name="url" 
-          placeholder="https://example.com" 
-          style="width: 300px; padding: 8px; font-size: 16px;" 
-          required
-        />
-        <br /><br />
-        <button type="submit" style="padding: 10px 20px; font-size: 16px;">
-          Browse Anonymously
-        </button>
-      </form>
-    </body>
-    </html>
+    <h2>🌐 Karibu Secroxy 2.0</h2>
+    <form method="GET" action="/go">
+      <input type="text" name="url" placeholder="https://example.com" style="width: 300px;" required />
+      <button type="submit">Browse</button>
+    </form>
   `);
 });
 
-// Start server kwenye PORT environment au default 3000
+// Middleware to proxy to any URL
+app.use('/go', (req, res, next) => {
+  const target = req.query.url;
+  if (!target || !target.startsWith('http')) {
+    return res.status(400).send('❌ URL is invalid or missing.');
+  }
+
+  // Create dynamic proxy
+  createProxyMiddleware({
+    target,
+    changeOrigin: true,
+    secure: false,
+    pathRewrite: { '^/go': '' },
+    onError(err, req, res) {
+      console.error('❌ Proxy error:', err.message);
+      res.status(500).send('❌ Proxy failed: Could not connect to target.');
+    },
+  })(req, res, next);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Secroxy is live on http://localhost:${PORT}`);
-})
+  console.log(`✅ Secroxy 2.0 live on http://localhost:${PORT}`);
+});
